@@ -1,303 +1,488 @@
-# Mealy Project - Render Deployment Guide
+# Mealy Project - Deployment Guide
 
-## 📋 Complete Step-by-Step Deployment Instructions
+## 🚀 Choose Your Deployment Platform
 
-This guide will help you deploy the Mealy full-stack application on Render.com
-
----
-
-
-
-## 📦 Part 1: Deploy Backend (Flask API)
-
-### Step 1.1: Create New Web Service
-
-1. Go to [https://dashboard.render.com](https://dashboard.render.com)
-2. Click the **"New +"** button (top right)
-3. Select **"Web Service"**
-4. Click **"Connect account"** to connect your GitHub
-5. Find and select your `Group-2-mealy-project` repository
-6. Click **"Connect"**
-
-### Step 1.2: Configure Backend Settings
-
-Fill in the following settings:
-
-| Field | Value |
-|-------|-------|
-| **Name** | `mealy-backend` |
-| **Region** | Choose closest to your location (e.g., Oregon USA) |
-| **Branch** | `main` |
-| **Root Directory** | `server` |
-| **Runtime** | `Python 3` |
-| **Build Command** | `pip install -r requirements.txt` |
-| **Start Command** | `gunicorn app:app --bind 0.0.0.0:$PORT` |
-| **Instance Type** | `Free` |
-
-### Step 1.3: Add Environment Variables
-
-Click **"Advanced"** button, then scroll to **"Environment Variables"** section.
-
-Click **"Add Environment Variable"** and add each of these:
-
-```bash
-# Required Variables
-DATABASE_URL=sqlite:///mealy.db
-JWT_SECRET_KEY=mealy_jwt_secret_2024_prod_8k9m2n4p6q8r0s2t4u6v8w0x2y4z6a8b
-SECRET_KEY=mealy_flask_secret_2024_prod_1a3c5e7g9i1k3m5o7q9s1u3w5y7z9b2d
-FLASK_ENV=production
-FLASK_DEBUG=False
-PORT=10000
-```
-
-**Optional (for Google OAuth - if you have credentials):**
-```bash
-GOOGLE_CLIENT_ID=your-actual-google-client-id.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=your-actual-google-client-secret
-```
-
-### Step 1.4: Deploy Backend
-
-1. Click **"Create Web Service"** button at the bottom
-2. Wait 3-5 minutes while Render builds and deploys your backend
-3. Watch the logs to ensure everything builds successfully
-4. Once deployed, you'll see: **"Your service is live 🎉"**
-
-### Step 1.5: Test Backend & Copy URL
-
-1. At the top of the page, you'll see your backend URL (e.g., `https://mealy-backend.onrender.com`)
-2. **COPY THIS URL** - you'll need it for the frontend
-3. Test it by visiting: `https://mealy-backend.onrender.com/health`
-4. You should see: `{"ok": true}`
-
-✅ **Backend is now live!**
+This guide provides instructions for deploying the Mealy full-stack application on different platforms.
 
 ---
 
-## 🎨 Part 2: Deploy Frontend (React App)
+## 📋 Deployment Options
 
-### Step 2.1: Create New Static Site
+### Option 1: Railway (Recommended - Completely FREE)
+**Best for**: Free deployment, easy setup, full-stack apps
 
-1. Go back to Render Dashboard: [https://dashboard.render.com](https://dashboard.render.com)
-2. Click **"New +"** button
-3. Select **"Static Site"**
-4. Find and select your `Group-2-mealy-project` repository
-5. Click **"Connect"**
+- **Cost**: $0/month (within $5 free credit)
+- **Includes**: Backend + Frontend + Database
+- **Setup Time**: ~10 minutes
+- **Difficulty**: Easy
 
-### Step 2.2: Configure Frontend Settings
-
-Fill in the following settings:
-
-| Field | Value |
-|-------|-------|
-| **Name** | `mealy-frontend` |
-| **Branch** | `main` |
-| **Root Directory** | `client` |
-| **Build Command** | `npm install && npm run build` |
-| **Publish Directory** | `client/build` |
-
-### Step 2.3: Add Environment Variables
-
-Click **"Advanced"** button, then scroll to **"Environment Variables"**.
-
-**IMPORTANT:** Replace `https://mealy-backend.onrender.com` with YOUR actual backend URL from Step 1.5
-
-```bash
-REACT_APP_API_URL=https://mealy-backend.onrender.com
-DISABLE_ESLINT_PLUGIN=true
-CI=false
-```
-
-### Step 2.4: Deploy Frontend
-
-1. Click **"Create Static Site"** button
-2. Wait 5-8 minutes while Render builds your React app
-3. Watch the logs to ensure everything builds successfully
-4. Once deployed, you'll see: **"Your site is live 🎉"**
-
-### Step 2.5: Get Frontend URL
-
-1. Copy your frontend URL (e.g., `https://mealy-frontend.onrender.com`)
-2. Open it in your browser
-3. You should see the Mealy application!
-
-✅ **Frontend is now live!**
+**📖 [Railway Deployment Guide →](./RAILWAY_DEPLOYMENT_GUIDE.md)**
 
 ---
 
-## ✅ Part 3: Testing Your Deployment
+### Option 2: Render (Partially FREE)
+**Best for**: Those who prefer Render or already have an account
 
-### Test 1: Backend Health Check
-```
-URL: https://mealy-backend.onrender.com/health
-Expected: {"ok": true}
-```
+- **Cost**: $7/month (backend only - frontend & database are free)
+- **Includes**: Backend (paid) + Frontend (free) + Database (free)
+- **Setup Time**: ~15 minutes
+- **Difficulty**: Easy
 
-### Test 2: Backend API Info
-```
-URL: https://mealy-backend.onrender.com/
-Expected: JSON with API endpoints list
-```
-
-### Test 3: Frontend Application
-```
-URL: https://mealy-frontend.onrender.com
-Expected: Mealy home page loads
-```
-
-### Test 4: Full Integration Test
-1. Go to your frontend URL
-2. Click "Register" or "Login"
-3. Try to create an account
-4. If successful, your frontend and backend are connected! ✅
+**📖 [Render Deployment Guide →](./RENDER_DEPLOYMENT_GUIDE.md)**
 
 ---
 
-## 🔑 Environment Variables Reference
+## 🎯 Quick Comparison
+
+| Feature | Railway | Render |
+|---------|---------|--------|
+| **Backend Cost** | FREE ($5 credit) | $7/month |
+| **Frontend Cost** | FREE ($5 credit) | FREE |
+| **Database Cost** | FREE ($5 credit) | FREE |
+| **Total Monthly Cost** | **$0** | **$7** |
+| **Build Speed** | Fast | Medium |
+| **Ease of Setup** | Very Easy | Easy |
+| **Custom Domains** | FREE | Paid only |
+| **Auto-deploy** | ✅ Yes | ✅ Yes |
+| **CLI Tool** | ✅ Yes | ❌ No |
+
+---
+
+## 🏆 Our Recommendation
+
+### For Most Users: Railway
+
+**Why Railway?**
+- ✅ Completely FREE (within $5/month credit)
+- ✅ Typically uses $3-6/month for small to medium apps
+- ✅ Easy to set up and deploy
+- ✅ Great developer experience
+- ✅ Includes everything you need
+- ✅ No credit card required for free tier
+
+**When to use Render:**
+- You already have a Render account
+- You're willing to pay $7/month for backend
+- You prefer Render's interface
+
+---
+
+## 📚 Detailed Deployment Guides
+
+### Railway Deployment
+
+**Follow this guide for completely FREE deployment:**
+
+**📖 [Complete Railway Deployment Guide](./RAILWAY_DEPLOYMENT_GUIDE.md)**
+
+**Quick Summary:**
+1. Sign up for Railway with GitHub
+2. Create new project from your repository
+3. Add PostgreSQL database
+4. Deploy backend service
+5. Deploy frontend service
+6. Set environment variables
+7. Test your application
+
+**Total Time**: ~10 minutes
+**Total Cost**: $0/month
+
+---
+
+### Render Deployment
+
+**Follow this guide if you prefer Render:**
+
+**📖 [Complete Render Deployment Guide](./RENDER_DEPLOYMENT_GUIDE.md)**
+
+**Quick Summary:**
+1. Sign up for Render with GitHub
+2. Create PostgreSQL database (FREE)
+3. Deploy backend web service ($7/month)
+4. Deploy frontend static site (FREE)
+5. Set environment variables
+6. Test your application
+
+**Total Time**: ~15 minutes
+**Total Cost**: $7/month
+
+---
+
+## 🔑 Environment Variables Needed
 
 ### Backend Environment Variables
 
-| Variable | Value | Purpose |
-|----------|-------|---------|
-| `DATABASE_URL` | `sqlite:///mealy.db` | Database connection string |
-| `JWT_SECRET_KEY` | `mealy_jwt_secret_2024_prod_8k9m2n4p6q8r0s2t4u6v8w0x2y4z6a8b` | JWT token encryption key |
-| `SECRET_KEY` | `mealy_flask_secret_2024_prod_1a3c5e7g9i1k3m5o7q9s1u3w5y7z9b2d` | Flask session encryption |
-| `FLASK_ENV` | `production` | Flask environment mode |
-| `FLASK_DEBUG` | `False` | Disable debug mode in production |
-| `PORT` | `10000` | Port number (Render default) |
+Both platforms require these backend environment variables:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection | Auto-generated |
+| `FLASK_APP` | Flask entry point | `app.py` |
+| `FLASK_ENV` | Environment mode | `production` |
+| `JWT_SECRET_KEY` | JWT token secret | Generate with `openssl rand -hex 32` |
+| `SECRET_KEY` | Flask secret key | Generate with `openssl rand -hex 32` |
+| `PORT` | Server port | `5000` |
 
 ### Frontend Environment Variables
 
-| Variable | Value | Purpose |
-|----------|-------|---------|
-| `REACT_APP_API_URL` | `https://mealy-backend.onrender.com` | Backend API endpoint |
-| `DISABLE_ESLINT_PLUGIN` | `true` | Disable ESLint in build |
-| `CI` | `false` | Prevent treating warnings as errors |
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `REACT_APP_API_URL` | Backend URL | `https://your-backend.up.railway.app` |
+| `NODE_VERSION` | Node.js version | `18.x` |
 
 ---
 
-## 🐛 Troubleshooting Common Issues
+## 📦 What Gets Deployed
 
-### Issue 1: Backend Returns 503 Error
-**Solution:**
-- Go to Render Dashboard → Your backend service
-- Click "Logs" tab
-- Look for error messages
-- Common issues:
-  - Missing environment variables
-  - Python package installation failed
-  - Port binding error
+### Backend (Flask API)
+- **Location**: `server/` directory
+- **Runtime**: Python 3.11
+- **Framework**: Flask
+- **Database**: PostgreSQL
+- **Server**: Gunicorn
+- **Key Features**:
+  - User authentication (JWT)
+  - Menu management
+  - Order processing
+  - Admin dashboard
 
-### Issue 2: Frontend Shows "Cannot Connect to Server"
-**Solution:**
+### Frontend (React App)
+- **Location**: `client/` directory
+- **Runtime**: Node.js 18.x
+- **Framework**: React
+- **Build Tool**: Create React App
+- **Key Features**:
+  - User registration/login
+  - Menu browsing
+  - Order placement
+  - Order history
+
+### Database (PostgreSQL)
+- **Type**: PostgreSQL 15
+- **Tables**:
+  - Users
+  - Caterers
+  - Daily Menus
+  - Dishes
+  - Orders
+  - Order Items
+
+---
+
+## 🧪 Testing Your Deployment
+
+After deployment, test these endpoints:
+
+### 1. Backend Health Check
+```
+URL: https://your-backend-url/health
+Expected Response: {"ok": true}
+```
+
+### 2. Backend API Info
+```
+URL: https://your-backend-url/
+Expected Response: JSON with all API endpoints
+```
+
+### 3. Frontend Application
+```
+URL: https://your-frontend-url
+Expected: Mealy homepage loads
+```
+
+### 4. Full Integration Test
+1. Visit frontend URL
+2. Register a new user
+3. Login with credentials
+4. Browse menu (if available)
+5. Place an order (if menu exists)
+
+---
+
+## 🔧 Configuration Files
+
+These files are already configured in your repository:
+
+### For Railway:
+- `railway.json` - General Railway configuration
+- `nixpacks.toml` - Build and deployment instructions
+- `server/requirements.txt` - Python dependencies
+- `client/package.json` - Node.js dependencies
+
+### For Render:
+- `render.yaml` - Blueprint configuration
+- `server/requirements.txt` - Python dependencies
+- `client/package.json` - Node.js dependencies
+- `client/public/_redirects` - React Router configuration
+
+---
+
+## 🐛 Common Issues
+
+### Issue 1: Build Fails
+
+**Symptoms**: Deployment fails during build phase
+
+**Solutions**:
+- Check build logs for specific errors
+- Verify all dependencies are in `requirements.txt` or `package.json`
+- Ensure correct Python/Node version
+- Try building locally first
+
+### Issue 2: Database Connection Error
+
+**Symptoms**: Backend can't connect to database
+
+**Solutions**:
+- Verify `DATABASE_URL` is set correctly
+- Check database service is running
+- Ensure database and backend are in same region (Render)
+- Check database is linked to backend service (Railway)
+
+### Issue 3: Frontend Can't Connect to Backend
+
+**Symptoms**: "Network Error" or "Failed to fetch" in frontend
+
+**Solutions**:
 - Verify `REACT_APP_API_URL` is set correctly
-- Make sure it points to your actual backend URL
-- Must be set BEFORE building (rebuild if you add it later)
-- Check backend is running (visit /health endpoint)
+- Must rebuild frontend after changing env vars
+- Check backend is running and accessible
+- Verify CORS is configured in backend
 
-### Issue 3: Build Fails
-**Solution:**
-- Check "Root Directory" is correct (`server` for backend, `client` for frontend)
-- Verify build commands are correct
-- Check logs for specific error messages
+### Issue 4: 404 on Frontend Routes
 
-### Issue 4: "CORS Error" in Browser Console
-**Solution:**
-- Backend already has CORS configured
-- Make sure you're using HTTPS URLs (not HTTP)
-- Clear browser cache and try again
+**Symptoms**: Refreshing a route gives 404 error
 
-### Issue 5: Database Errors
-**Solution:**
-- SQLite works for testing but isn't great for production
-- For production, consider upgrading to PostgreSQL:
-  1. Create PostgreSQL database on Render
-  2. Copy the "Internal Database URL"
-  3. Update `DATABASE_URL` environment variable
+**Solutions**:
+- Ensure `client/public/_redirects` exists
+- Verify file contains: `/*    /index.html   200`
+- Check redirect rules in platform settings
 
 ---
 
-## 🔄 Redeploying After Changes
+## 🔄 Continuous Deployment
 
-### If You Make Code Changes:
+Both platforms support automatic deployments:
 
-**Option 1: Automatic (Recommended)**
-- Push changes to GitHub
-- Render will automatically rebuild and redeploy
+### Setup
+1. Connect your GitHub repository
+2. Choose branch to deploy (usually `main`)
+3. Enable auto-deploy
 
-**Option 2: Manual**
-- Go to Render Dashboard
-- Click on your service
-- Click "Manual Deploy" → "Deploy latest commit"
+### Workflow
+```bash
+# Make changes locally
+git add .
+git commit -m "Update feature"
+git push origin main
 
-### If You Change Environment Variables:
-1. Go to service in Render Dashboard
-2. Click "Environment" tab
-3. Update the variable
-4. Service will automatically redeploy
+# Platform automatically detects push and redeploys
+```
 
----
-
-## 📝 Important Notes
-
-1. **Free Tier Limitations:**
-   - Free services spin down after 15 minutes of inactivity
-   - First request after spin-down takes 30-60 seconds
-   - Upgrade to paid tier for always-on services
-
-2. **Security Notes:**
-   - The provided secret keys are for deployment purposes
-   - For a production app, generate your own secure random keys
-   - Never commit `.env` files to GitHub
-
-3. **Database:**
-   - SQLite works but data is lost when service restarts
-   - For persistent data, use PostgreSQL (available on Render)
-
-4. **OAuth Setup:**
-   - Google/Apple OAuth won't work without proper credentials
-   - Get credentials from Google Cloud Console / Apple Developer
-   - Add them to backend environment variables
+### Disable Auto-Deploy
+- **Railway**: Service Settings → Deployment → Toggle off
+- **Render**: Service Settings → Build & Deploy → Toggle off
 
 ---
 
-## 🎉 Success Checklist
+## 🔐 Security Best Practices
 
-- [ ] Backend service created and deployed
-- [ ] Backend URL copied and tested (`/health` returns `{"ok": true}`)
-- [ ] Frontend service created with correct `REACT_APP_API_URL`
-- [ ] Frontend deployed successfully
-- [ ] Frontend URL opens and shows Mealy app
-- [ ] Can register/login successfully
-- [ ] Both URLs bookmarked for future reference
+### 1. Use Strong Secrets
+```bash
+# Generate secure secrets
+openssl rand -hex 32
+```
+
+### 2. Restrict CORS in Production
+```python
+# server/app.py
+CORS(app, resources={r"/*": {
+    "origins": ["https://your-frontend-url.com"]
+}})
+```
+
+### 3. Never Commit Secrets
+- Use platform's environment variable management
+- Never commit `.env` files to Git
+- Add `.env` to `.gitignore`
+
+### 4. Use HTTPS Only
+- Both platforms provide HTTPS automatically
+- Never use HTTP in production
+
+### 5. Keep Dependencies Updated
+```bash
+# Backend
+pip list --outdated
+pip install --upgrade -r requirements.txt
+
+# Frontend
+npm outdated
+npm update
+```
 
 ---
 
-## 📞 Support
+## 📊 Monitoring & Maintenance
 
-If you encounter issues:
+### Monitor Usage
+- **Railway**: Project → Usage tab
+- **Render**: Service → Metrics tab
 
-1. Check Render logs first (click "Logs" in dashboard)
-2. Review this guide's troubleshooting section
-3. Verify all environment variables are set correctly
-4. Check that Root Directory is correct for both services
+### View Logs
+- **Railway**: Service → Deployments → View logs
+- **Render**: Service → Logs tab
 
----
+### Set Up Alerts
+- **Railway**: Project Settings → Notifications
+- **Render**: Not available on free tier
 
-## 🔗 Your Deployment URLs
-
-After deployment, record your URLs here:
-
-**Backend URL:** `_________________________________`
-
-**Frontend URL:** `_________________________________`
-
----
-
-**Deployment Date:** `_________________________________`
-
-**Deployed By:** `_________________________________`
+### Regular Maintenance Tasks
+- **Weekly**: Check logs for errors
+- **Bi-weekly**: Review usage metrics
+- **Monthly**: Update dependencies
+- **Quarterly**: Security audit
 
 ---
 
+## 💰 Cost Optimization
 
+### Railway (FREE)
+**To stay within free tier ($5/month):**
+- Typical usage: $3-6/month
+- Monitor usage regularly
+- Optimize database queries
+- Use caching where possible
+
+**If you exceed:**
+- Upgrade to Developer Plan: $5/month (additional $5 credit)
+
+### Render (PAID)
+**Current cost: $7/month**
+
+**To reduce costs:**
+- Keep frontend on free tier
+- Use free PostgreSQL database
+- Optimize backend resource usage
+
+---
+
+## 🎓 Learning Resources
+
+### Platform Documentation
+- **Railway**: https://docs.railway.app
+- **Render**: https://render.com/docs
+
+### Framework Documentation
+- **Flask**: https://flask.palletsprojects.com
+- **React**: https://react.dev
+- **PostgreSQL**: https://www.postgresql.org/docs
+
+### Community Support
+- **Railway Discord**: https://discord.gg/railway
+- **Render Community**: https://community.render.com
+
+---
+
+## ✅ Deployment Checklist
+
+Before deploying:
+- [ ] Code is pushed to GitHub
+- [ ] `requirements.txt` is up to date
+- [ ] `package.json` is up to date
+- [ ] All tests pass locally
+- [ ] Environment variables are documented
+
+After deploying:
+- [ ] Backend health check works
+- [ ] Frontend loads correctly
+- [ ] User registration works
+- [ ] User login works
+- [ ] Database is connected
+- [ ] CORS is configured
+- [ ] HTTPS is enabled
+- [ ] Logs show no errors
+
+---
+
+## 🆘 Getting Help
+
+### Platform Support
+- **Railway**: Discord community, documentation
+- **Render**: Email support (paid plans), community forum
+
+### Project Issues
+- Create issue in GitHub repository
+- Check existing issues first
+- Provide detailed error messages and logs
+
+### Quick Debugging
+1. Check platform status page
+2. Review deployment logs
+3. Verify environment variables
+4. Test backend health endpoint
+5. Check browser console for frontend errors
+
+---
+
+## 🎉 Next Steps After Deployment
+
+1. **Test thoroughly**:
+   - Register users
+   - Create menus (as admin)
+   - Place orders
+   - Check order history
+
+2. **Set up monitoring**:
+   - Add uptime monitoring
+   - Configure error alerts
+   - Track usage metrics
+
+3. **Add custom domain** (optional):
+   - Register a domain
+   - Configure DNS
+   - Add to platform settings
+
+4. **Implement CI/CD** (optional):
+   - Add automated tests
+   - Set up staging environment
+   - Configure deployment pipelines
+
+5. **Scale as needed**:
+   - Monitor performance
+   - Upgrade resources if needed
+   - Add caching for optimization
+
+---
+
+## 📖 Deployment Guide Links
+
+- **Railway (FREE)**: [RAILWAY_DEPLOYMENT_GUIDE.md](./RAILWAY_DEPLOYMENT_GUIDE.md)
+- **Render ($7/month)**: [RENDER_DEPLOYMENT_GUIDE.md](./RENDER_DEPLOYMENT_GUIDE.md)
+
+---
+
+## 🔗 Record Your Deployment
+
+After successful deployment, record your URLs:
+
+**Platform Used**: `________________` (Railway / Render)
+
+**Backend URL**: `_________________________________`
+
+**Frontend URL**: `_________________________________`
+
+**Database**: `_________________________________`
+
+**Deployment Date**: `_________________________________`
+
+**Monthly Cost**: `_________________________________`
+
+---
+
+**Ready to deploy?** Choose your platform above and follow the detailed guide!
+
+**Need help?** Check the troubleshooting section or reach out to the platform's support community.
+
+**Last Updated**: 2025-10-11
