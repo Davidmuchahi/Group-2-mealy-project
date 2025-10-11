@@ -48,7 +48,12 @@ cd Group-2-mealy-project
 5. **Set up environment variables:**
    - Copy `.env` file or create one with:
    ```
-   DATABASE_URL=sqlite:///mealy.db
+   # PostgreSQL Database (recommended for production)
+   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mealy_db
+
+   # OR use SQLite for development (simpler setup)
+   # DATABASE_URL=sqlite:///mealy.db
+
    JWT_SECRET_KEY=super-secret-key
    SECRET_KEY=another-secret
    FLASK_ENV=development
@@ -86,7 +91,12 @@ cd Group-2-mealy-project
 5. **Set up environment variables:**
    - Copy `.env` file or create one with:
    ```
-   DATABASE_URL=sqlite:///mealy.db
+   # PostgreSQL Database (recommended for production)
+   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mealy_db
+
+   # OR use SQLite for development (simpler setup)
+   # DATABASE_URL=sqlite:///mealy.db
+
    JWT_SECRET_KEY=super-secret-key
    SECRET_KEY=another-secret
    FLASK_ENV=development
@@ -178,10 +188,79 @@ Make sure these ports are not in use by other applications.
 
 ---
 
-## Database Initialization
+## Database Setup
+
+### Option 1: PostgreSQL (Recommended for Production)
+
+PostgreSQL is a robust, production-ready database that provides better performance and scalability.
+
+#### Installing PostgreSQL
+
+**Windows:**
+1. Download PostgreSQL from [postgresql.org](https://www.postgresql.org/download/windows/)
+2. Run the installer and remember your password
+3. Default port is 5432
+
+**macOS:**
+```bash
+# Using Homebrew
+brew install postgresql
+brew services start postgresql
+
+# Create default postgres user (if needed)
+createdb mealy_db
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+```
+
+#### Setting Up PostgreSQL Database
+
+1. **Access PostgreSQL:**
+   ```bash
+   # macOS/Linux
+   psql -U postgres
+
+   # Windows (via Command Prompt as Administrator)
+   psql -U postgres
+   ```
+
+2. **Create the database:**
+   ```sql
+   CREATE DATABASE mealy_db;
+   \q
+   ```
+
+3. **Configure your `.env` file:**
+   ```
+   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mealy_db
+   ```
+
+   Format: `postgresql://username:password@host:port/database_name`
+
+4. **Run migrations:**
+   ```bash
+   cd server
+   source venv/bin/activate  # Windows: venv\Scripts\activate
+   flask db upgrade
+   ```
+
+### Option 2: SQLite (Quick Setup for Development)
+
+SQLite is simpler and requires no installation, but not recommended for production.
 
 The SQLite database will be created automatically on first run at:
 - `server/mealy.db`
+
+Configure your `.env` file:
+```
+DATABASE_URL=sqlite:///mealy.db
+```
 
 To reset the database, simply delete `mealy.db` and restart the server.
 
@@ -310,6 +389,50 @@ This creates a menu with a 4:00 PM cutoff time. Repeat this daily or create a cr
 - Windows: May need to run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` in PowerShell
 - Linux/Mac: Ensure `venv/bin/activate` has execute permissions: `chmod +x venv/bin/activate`
 
+### Issue 7: PostgreSQL connection errors
+**Symptoms:**
+- "could not connect to server"
+- "FATAL: password authentication failed"
+- "psycopg2.OperationalError"
+
+**Solutions:**
+1. **PostgreSQL not running:**
+   ```bash
+   # macOS
+   brew services start postgresql
+
+   # Linux
+   sudo systemctl start postgresql
+
+   # Windows - Start PostgreSQL service from Services app
+   ```
+
+2. **Wrong credentials:**
+   - Check your DATABASE_URL in `.env`
+   - Default PostgreSQL username is `postgres`
+   - If you forgot the password, you may need to reset it
+
+3. **Database doesn't exist:**
+   ```bash
+   psql -U postgres -c "CREATE DATABASE mealy_db;"
+   ```
+
+4. **Port conflict:**
+   - Ensure PostgreSQL is running on port 5432
+   - Check with: `psql -U postgres -p 5432`
+
+### Issue 8: Migration errors
+**Symptoms:** "Target database is not up to date" or migration fails
+
+**Solution:**
+```bash
+cd server
+source venv/bin/activate  # Windows: venv\Scripts\activate
+flask db stamp head  # Mark current state
+flask db migrate -m "sync database"
+flask db upgrade
+```
+
 ---
 
 ## Building for Production
@@ -335,12 +458,19 @@ The production build will be in `client/build/` directory.
 
 ### Backend (.env in server/)
 ```
-DATABASE_URL=sqlite:///mealy.db
+# Database - Choose one:
+# PostgreSQL (recommended for production):
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mealy_db
+# SQLite (simpler for development):
+# DATABASE_URL=sqlite:///mealy.db
+
 JWT_SECRET_KEY=super-secret-key
 SECRET_KEY=another-secret
 FLASK_ENV=development
 FLASK_DEBUG=True
 FLASK_PORT=5001
+
+# OAuth (optional)
 GOOGLE_CLIENT_ID=<your-google-client-id>
 GOOGLE_CLIENT_SECRET=<your-google-secret>
 ```

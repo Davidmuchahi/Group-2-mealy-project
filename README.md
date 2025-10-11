@@ -25,7 +25,34 @@ Mealy is a full-stack food ordering platform designed to connect customers with 
 ### Version Control
 - Git & GitHub (collaborative workflow)
 
-## Setup Instructions - Also check on the SETUP.md it has the instruction for windows and linux highly recommended
+## Setup Instructions
+
+For detailed setup instructions for **Windows, Linux, and macOS**, please see:
+- **[SETUP.md](SETUP.md)** - Complete setup guide (highly recommended)
+- **[POSTGRESQL_SETUP.md](POSTGRESQL_SETUP.md)** - PostgreSQL-specific guide
+
+### Quick PostgreSQL Setup
+
+We provide automated setup scripts for PostgreSQL:
+
+**Linux/macOS:**
+```bash
+cd server
+./setup_postgresql.sh
+```
+
+**Windows:**
+```cmd
+cd server
+setup_postgresql.bat
+```
+
+These scripts will automatically:
+- Check PostgreSQL installation
+- Create the database
+- Configure your `.env` file
+- Run migrations
+- Test the connection
 
 ### 1. Clone the Repository
 ```bash
