@@ -1,66 +1,62 @@
-# Deploy Mealy to Render
+# Deploy Mealy to Render - Updated Guide
 
-Complete guide to deploy the Mealy food ordering platform to Render (free tier available).
+Complete guide to deploy the Mealy food ordering platform to Render.
+
+## IMPORTANT: Render Free Tier Update
+
+**As of 2024**, Render no longer offers a free plan for web services. Here's what's available:
+
+- **Database (PostgreSQL)**: FREE (with limitations)
+- **Static Sites (Frontend)**: FREE (unlimited)
+- **Web Services (Backend)**: PAID ($7/month minimum)
+
+### Your Free Options
+
+**Option 1**: Deploy frontend only on Render (FREE) + backend on Railway/Fly.io (FREE)
+**Option 2**: Pay $7/month for backend on Render
+**Option 3**: Deploy everything on Railway or Fly.io (FREE)
+
+This guide covers **Option 2** (Frontend FREE + Backend PAID on Render).
+
+---
 
 ## Prerequisites
 
 - A [Render account](https://render.com) (sign up free)
 - Your code in a Git repository (GitHub/GitLab/Bitbucket)
+- Credit card (required for paid backend service)
 
-## Quick Deploy (5 Minutes)
+---
+
+## Quick Deploy Instructions
 
 ### Step 1: Sign In to Render
 1. Go to https://render.com
 2. Sign in with GitHub (recommended)
 
-### Step 2: Deploy Using Blueprint
-1. Click **"New +"** → **"Blueprint"**
-2. Connect your repository: `Group-2-mealy-project`
-3. Render detects `render.yaml` automatically
-4. Click **"Apply"** to start deployment
+### Step 2: Deploy PostgreSQL Database (FREE)
 
-### Step 3: Wait for Deployment (5-10 minutes)
-Render will automatically create:
-- PostgreSQL database (`mealy-postgres`)
-- Flask backend API (`mealy-backend`)
-- React frontend (`mealy-frontend`)
-
-### Step 4: Update Frontend API URL
-Once backend is deployed:
-
-1. Go to **mealy-backend** service
-2. Copy the URL (e.g., `https://mealy-backend-abc123.onrender.com`)
-3. Go to **mealy-frontend** service
-4. Click **"Environment"** tab
-5. Update `REACT_APP_API_URL` with your backend URL
-6. Save (triggers automatic redeploy)
-
-### Step 5: Access Your App
-- Frontend: `https://mealy-frontend.onrender.com`
-- Backend: `https://mealy-backend.onrender.com`
-- Test at: `https://mealy-backend.onrender.com/health` (should return `{"ok": true}`)
-
-## Manual Deployment (Alternative)
-
-If you prefer to deploy services individually:
-
-### A. Deploy PostgreSQL Database
-
-1. Dashboard → **"New"** → **"PostgreSQL"**
+1. Click **"New +"** → **"PostgreSQL"**
 2. Configure:
-   - Name: `mealy-postgres`
-   - Database: `mealy`
-   - User: `mealy`
-   - Plan: **Free**
+   - **Name**: `mealy-postgres`
+   - **Database**: `mealy`
+   - **User**: `mealy`
+   - **Region**: Choose closest to you
+   - **PostgreSQL Version**: 15
+   - **Plan**: **Free**
 3. Click **"Create Database"**
-4. Copy the **Internal Database URL**
+4. Wait 2-3 minutes for initialization
+5. **Save the Internal Database URL** (you'll need this later)
 
-### B. Deploy Backend (Flask API)
+### Step 3: Deploy Backend API (PAID - $7/month)
 
-1. Dashboard → **"New"** → **"Web Service"**
-2. Connect your repository
+1. Click **"New +"** → **"Web Service"**
+2. Connect your repository: `Group-2-mealy-project`
 3. Configure:
    - **Name**: `mealy-backend`
+   - **Region**: Same as database
+   - **Branch**: `main`
+   - **Root Directory**: Leave empty
    - **Runtime**: Python 3
    - **Build Command**:
      ```bash
@@ -70,74 +66,134 @@ If you prefer to deploy services individually:
      ```bash
      cd server && gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 app:app
      ```
-   - **Plan**: Free
+   - **Plan**: **Starter** ($7/month)
 
-4. Add Environment Variables:
-   ```
-   FLASK_APP=app.py
-   FLASK_ENV=production
-   DATABASE_URL=(paste Internal Database URL from step A)
-   JWT_SECRET_KEY=(generate random secure string)
-   SECRET_KEY=(generate random secure string)
-   PORT=5000
-   ```
+4. **Add Environment Variables**:
+   Click "Advanced" → "Add Environment Variable"
+
+   | Key | Value |
+   |-----|-------|
+   | `FLASK_APP` | `app.py` |
+   | `FLASK_ENV` | `production` |
+   | `DATABASE_URL` | Click "Add from Database" → Select `mealy-postgres` |
+   | `JWT_SECRET_KEY` | Click "Generate" for random value |
+   | `SECRET_KEY` | Click "Generate" for random value |
+   | `PYTHON_VERSION` | `3.11.0` |
+   | `PORT` | `5000` |
 
 5. Click **"Create Web Service"**
+6. Wait 5-10 minutes for build and deployment
+7. **Copy your backend URL** (e.g., `https://mealy-backend.onrender.com`)
 
-### C. Deploy Frontend (React)
+### Step 4: Deploy Frontend (FREE)
 
-1. Dashboard → **"New"** → **"Static Site"**
-2. Connect your repository
+1. Click **"New +"** → **"Static Site"**
+2. Connect your repository: `Group-2-mealy-project`
 3. Configure:
    - **Name**: `mealy-frontend`
+   - **Branch**: `main`
    - **Build Command**:
      ```bash
      cd client && npm install && npm run build
      ```
    - **Publish Directory**: `client/build`
-   - **Plan**: Free
+   - **Auto-Deploy**: Yes
 
-4. Add Environment Variables:
-   ```
-   REACT_APP_API_URL=(your backend URL from step B)
-   DISABLE_ESLINT_PLUGIN=true
+4. **Add Environment Variables**:
+
+   | Key | Value |
+   |-----|-------|
+   | `NODE_VERSION` | `18.x` |
+   | `REACT_APP_API_URL` | Your backend URL from Step 3 (e.g., `https://mealy-backend.onrender.com`) |
+
+5. **Add Redirect Rule** (for React Router):
+   - Scroll to "Redirects/Rewrites"
+   - Add rule:
+     - **Source**: `/*`
+     - **Destination**: `/index.html`
+     - **Action**: Rewrite
+
+6. Click **"Create Static Site"**
+7. Wait 3-5 minutes for build
+
+### Step 5: Test Your Deployment
+
+1. **Test Backend**:
+   - Visit: `https://mealy-backend.onrender.com/health`
+   - Should return: `{"ok": true}`
+
+2. **Test Frontend**:
+   - Visit: `https://mealy-frontend.onrender.com`
+   - Should load the Mealy homepage
+
+3. **Test Full Functionality**:
+   - Register a new user
+   - Login
+   - Browse menu
+   - Place an order
+
+---
+
+## Alternative: Deploy Using render.yaml Blueprint
+
+**Note**: The current `render.yaml` has been updated to only include free services (frontend + database). You'll need to manually add the backend.
+
+### Using Blueprint (Partial Deployment)
+
+1. Push your code to GitHub:
+   ```bash
+   git add .
+   git commit -m "Prepare for Render deployment"
+   git push origin main
    ```
 
-5. Click **"Create Static Site"**
+2. In Render Dashboard:
+   - Click **"New +"** → **"Blueprint"**
+   - Connect your repository
+   - Select branch: `main`
+   - Click **"Apply"**
+
+This will create:
+- PostgreSQL database (FREE)
+- Frontend static site (FREE)
+
+3. Then manually add the backend following **Step 3** above.
+
+---
 
 ## Environment Variables Reference
 
-### Backend Required Variables
+### Backend Environment Variables
 
-| Variable | Value | Description |
-|----------|-------|-------------|
-| `FLASK_APP` | `app.py` | Flask entry point |
-| `FLASK_ENV` | `production` | Environment mode |
-| `DATABASE_URL` | Auto-connected | PostgreSQL connection |
-| `JWT_SECRET_KEY` | Auto-generated | JWT token secret |
-| `SECRET_KEY` | Auto-generated | Flask secret key |
-| `PORT` | `5000` | Server port |
+| Variable | Required | Description | Example |
+|----------|----------|-------------|---------|
+| `FLASK_APP` | Yes | Flask entry point | `app.py` |
+| `FLASK_ENV` | Yes | Environment mode | `production` |
+| `DATABASE_URL` | Yes | PostgreSQL connection | Auto-linked from database |
+| `JWT_SECRET_KEY` | Yes | JWT token secret | Auto-generated |
+| `SECRET_KEY` | Yes | Flask secret key | Auto-generated |
+| `PORT` | Yes | Server port | `5000` |
+| `PYTHON_VERSION` | Yes | Python version | `3.11.0` |
+| `GOOGLE_CLIENT_ID` | No | Google OAuth (optional) | Your Google client ID |
+| `APPLE_CLIENT_ID` | No | Apple OAuth (optional) | Your Apple client ID |
 
-### Backend Optional Variables (OAuth)
+### Frontend Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `APPLE_CLIENT_ID` | Apple Sign In client ID |
+| Variable | Required | Description | Example |
+|----------|----------|-------------|---------|
+| `REACT_APP_API_URL` | Yes | Backend API URL | `https://mealy-backend.onrender.com` |
+| `NODE_VERSION` | Yes | Node.js version | `18.x` |
+| `DISABLE_ESLINT_PLUGIN` | No | Disable ESLint warnings | `true` |
 
-### Frontend Required Variables
-
-| Variable | Example | Description |
-|----------|---------|-------------|
-| `REACT_APP_API_URL` | `https://mealy-backend.onrender.com` | Backend API URL |
-| `DISABLE_ESLINT_PLUGIN` | `true` | Disable build warnings |
+---
 
 ## Database Migrations
 
-When you update database schema:
+When you update your database schema:
 
-1. Go to backend service in Render Dashboard
-2. Open the **"Shell"** tab
+### Option 1: Via Render Shell
+1. Go to your backend service in Render
+2. Click **"Shell"** tab
 3. Run:
    ```bash
    cd server
@@ -145,124 +201,242 @@ When you update database schema:
    flask db upgrade
    ```
 
-## Free Tier Limitations
+### Option 2: Via Build Command
+Add migrations to your build command:
+```bash
+cd server && pip install --upgrade pip && pip install -r requirements.txt && flask db upgrade
+```
 
-- **Database**: 1GB storage
-- **Services spin down** after 15 minutes of inactivity
-- **First request** after spin-down takes 30-60 seconds
-- **750 hours/month** free usage per service
-
-### Keep Services Active (Free)
-
-Use a free uptime monitor to ping your backend every 10-15 minutes:
-- [UptimeRobot](https://uptimerobot.com)
-- [Cronitor](https://cronitor.io)
-- [Better Uptime](https://betteruptime.com)
-
-### Upgrade to Always-On ($7/month)
-
-1. Go to **mealy-backend** service
-2. Click **"Settings"** → **"Upgrade Plan"**
-3. Select **"Starter"** plan
+---
 
 ## Troubleshooting
 
 ### Build Failures
 
-**Backend build fails:**
-- Check that `requirements.txt` exists in `server/` directory
-- Verify Python version compatibility (3.8+)
+**Backend Build Fails**:
+- Check `server/requirements.txt` exists and is complete
+- Verify Python version (3.8+ required)
 - Review build logs in Render dashboard
+- Common issue: Missing dependencies
 
-**Frontend build fails:**
-- Ensure `package.json` exists in `client/` directory
-- Check Node version (should be 18.x)
-- Review build logs for missing dependencies
+**Frontend Build Fails**:
+- Check `client/package.json` exists
+- Verify Node version (18.x recommended)
+- Review build logs for errors
+- Try: `npm install` locally first
 
-### "Failed to fetch" Error
+### Runtime Errors
 
-- **Cause**: Backend is spinning up or wrong API URL
-- **Solution**:
-  - Wait 30-60 seconds for backend to wake up
-  - Verify `REACT_APP_API_URL` is correct in frontend settings
+**"Failed to fetch" or "Network Error"**:
+- Backend service is starting up (wait 30-60 seconds)
+- Wrong `REACT_APP_API_URL` in frontend
+- CORS issue (check backend logs)
 
-### Database Connection Error
+**Database Connection Error**:
+- Database not fully initialized (wait 2-3 minutes)
+- Wrong `DATABASE_URL` environment variable
+- Database service stopped (check Render dashboard)
 
-- Wait 2-3 minutes for database to fully initialize
-- Verify `DATABASE_URL` environment variable is set
-- Check database status in Render dashboard
+**404 on Frontend Route Refresh**:
+- Missing redirect rule in static site settings
+- Add rewrite rule: `/*` → `/index.html`
 
-### 404 on Frontend Route Refresh
+**CORS Errors**:
+Backend should have CORS enabled. Check `server/app.py`:
+```python
+from flask_cors import CORS
+CORS(app, resources={r"/*": {"origins": "*"}})
+```
 
-- The `_redirects` file in `client/public/` handles this
-- Verify it contains: `/*    /index.html   200`
-
-### CORS Errors
-
-Backend is configured with `CORS(app, resources={r"/*": {"origins": "*"}})`.
-
-For production, restrict to your frontend domain in `server/app.py:37`:
+For production, restrict to your frontend domain:
 ```python
 CORS(app, resources={r"/*": {"origins": ["https://mealy-frontend.onrender.com"]}})
 ```
 
-## Monitoring and Logs
+---
 
-1. **View Logs**: Service → "Logs" tab
-2. **Metrics**: Monitor CPU, memory, request counts
-3. **Health Check**: Backend automatically monitors `/health` endpoint
+## Monitoring and Maintenance
 
-## Automatic Redeployment
+### View Logs
+1. Go to your service in Render dashboard
+2. Click **"Logs"** tab
+3. View real-time logs or search history
 
-Render automatically redeploys when you push to your connected Git branch.
+### Monitor Performance
+- **Metrics** tab shows:
+  - CPU usage
+  - Memory usage
+  - Request count
+  - Response times
 
-To disable:
+### Health Checks
+- Backend automatically monitors `/health` endpoint
+- If endpoint fails, service restarts automatically
+
+---
+
+## Automatic Deployments
+
+Render automatically redeploys when you push to your connected Git branch:
+
+```bash
+git add .
+git commit -m "Update feature"
+git push origin main
+```
+
+**To disable auto-deploy**:
 - Service Settings → "Build & Deploy" → Disable "Auto-Deploy"
+
+---
 
 ## Database Backups
 
-- **Automatic**: Daily backups (retained 7 days on free tier)
-- **Manual**: Go to PostgreSQL service → "Backups" tab
+**Automatic Backups**:
+- Free tier: Daily backups (7 days retention)
+- Paid tier: More frequent backups (longer retention)
 
-## Security Recommendations
+**Manual Backup**:
+1. Go to PostgreSQL service
+2. Click **"Backups"** tab
+3. Click **"Create Backup"**
 
-1. **Strong Secrets**: Use auto-generated values for JWT_SECRET_KEY and SECRET_KEY
-2. **Restrict CORS**: Limit origins to your frontend domain only
-3. **HTTPS**: Automatically enabled by Render
-4. **Database Access**: Use internal database URL (not external)
-5. **No Secrets in Git**: Never commit environment variables to repository
+**Restore from Backup**:
+1. Click on backup in list
+2. Click **"Restore"**
+
+---
 
 ## Cost Breakdown
 
-**Free Tier (Current Setup):**
-- PostgreSQL: $0/month (1GB)
-- Backend: $0/month (with spin-down)
-- Frontend: $0/month (100GB bandwidth)
-- **Total: $0/month**
+### Current Setup (Frontend Free + Backend Paid)
 
-**With Backend Always Active:**
-- Backend Starter Plan: $7/month
-- **Total: $7/month**
+| Service | Plan | Cost |
+|---------|------|------|
+| PostgreSQL Database | Free | $0/month |
+| Backend Web Service | Starter | $7/month |
+| Frontend Static Site | Free | $0/month |
+| **Total** | | **$7/month** |
 
-**Professional Setup:**
-- Backend: $25/month (priority support, 2GB RAM)
-- Database: $7/month (10GB storage)
-- **Total: $32/month**
+### Free Tier Limitations
 
-## Post-Deployment Testing
+**Database (Free)**:
+- 1GB storage
+- 97 max connections
+- Expires after 90 days of inactivity
 
-1. Visit backend: `https://your-backend.onrender.com/health`
-2. Register a new user via frontend
-3. Login with credentials
-4. Browse menu and place an order
-5. Check order history
+**Static Site (Free)**:
+- 100GB bandwidth/month
+- Unlimited builds
 
-## Support Resources
+**Backend (Starter - $7/month)**:
+- 512MB RAM
+- Always on (no spin-down)
+- Priority support
 
-- [Render Documentation](https://render.com/docs)
-- [Render Community Forum](https://community.render.com)
-- [Flask Deployment Best Practices](https://flask.palletsprojects.com/en/latest/deploying/)
-- [React Deployment Guide](https://create-react-app.dev/docs/deployment/)
+### Upgrade Options
+
+**Backend Standard ($25/month)**:
+- 2GB RAM
+- Better performance
+- Priority support
+
+**Database Standard ($7/month)**:
+- 10GB storage
+- No expiration
+- Better performance
+
+---
+
+## Security Best Practices
+
+1. **Use Strong Secrets**:
+   - Always use auto-generated values for JWT_SECRET_KEY and SECRET_KEY
+   - Never commit secrets to Git
+
+2. **Restrict CORS**:
+   ```python
+   CORS(app, resources={r"/*": {
+       "origins": ["https://mealy-frontend.onrender.com"]
+   }})
+   ```
+
+3. **HTTPS Only**:
+   - Automatically enabled by Render
+   - All traffic is encrypted
+
+4. **Database Access**:
+   - Use Internal Database URL (not External)
+   - Internal URL only accessible within Render network
+
+5. **Environment Variables**:
+   - Never commit `.env` files to Git
+   - Use Render's environment variable management
+
+---
+
+## Custom Domain (Optional)
+
+To use your own domain:
+
+1. Go to frontend service settings
+2. Click **"Custom Domain"**
+3. Add your domain (e.g., `mealy.com`)
+4. Update DNS records as shown
+5. Wait for SSL certificate (automatic)
+
+**Note**: Custom domains require verification. Backend custom domains require paid plan.
+
+---
+
+## Post-Deployment Checklist
+
+- [ ] Backend `/health` endpoint returns `{"ok": true}`
+- [ ] Frontend loads correctly
+- [ ] User registration works
+- [ ] User login works
+- [ ] Menu items display
+- [ ] Order placement works
+- [ ] Database migrations applied
+- [ ] Environment variables set correctly
+- [ ] CORS configured properly
+- [ ] HTTPS enabled (automatic)
+- [ ] Logs show no errors
+
+---
+
+## Getting Help
+
+- **Render Documentation**: https://render.com/docs
+- **Render Community**: https://community.render.com
+- **GitHub Issues**: Report bugs in your repository
+- **Render Support**: Available in dashboard (paid plans get priority)
+
+---
+
+## Alternative Free Platforms
+
+If you prefer completely free hosting:
+
+### Railway
+- **Free tier**: $5 credit/month
+- **Pros**: Easy setup, good for full-stack
+- **Cons**: Credit expires monthly
+- **Signup**: https://railway.app
+
+### Fly.io
+- **Free tier**: 3 VMs, 3GB storage
+- **Pros**: Good performance, PostgreSQL included
+- **Cons**: Slightly complex setup
+- **Signup**: https://fly.io
+
+### Vercel + Railway
+- **Frontend**: Vercel (free, unlimited)
+- **Backend**: Railway (free $5/month credit)
+- **Pros**: Best performance for React apps
+- **Cons**: Two platforms to manage
+
+---
 
 ## Architecture Overview
 
@@ -275,26 +449,38 @@ To disable:
 │  │ mealy-frontend │──▶│ mealy-backend│ │
 │  │  (React SPA)   │   │  (Flask API) │ │
 │  │  Static Site   │   │  Web Service │ │
+│  │     FREE       │   │   $7/month   │ │
 │  └────────────────┘   └──────┬───────┘ │
 │                               │          │
 │                      ┌────────▼───────┐ │
 │                      │ mealy-postgres │ │
 │                      │   (Database)   │ │
+│                      │      FREE      │ │
 │                      └────────────────┘ │
 └─────────────────────────────────────────┘
 ```
 
-## Configuration Files
+---
 
-- `render.yaml` - Render Blueprint configuration (database, backend, frontend)
-- `client/.env.production` - Production environment variables template
-- `server/requirements.txt` - Python dependencies
-- `client/package.json` - Node.js dependencies
+## Summary
 
-## Ready to Deploy
+**Total Cost**: $7/month (Backend only - Frontend and Database are FREE)
 
-Follow the **Quick Deploy** steps above to get your Mealy app live in 5 minutes!
+**Deployment Time**: ~15 minutes
+
+**Steps**:
+1. Create PostgreSQL database (FREE)
+2. Deploy backend web service ($7/month)
+3. Deploy frontend static site (FREE)
+4. Configure environment variables
+5. Test application
+
+**Alternative**: Use Railway or Fly.io for completely free hosting
 
 ---
 
-**Questions?** Check the troubleshooting section or visit [Render's documentation](https://render.com/docs).
+**Ready to deploy?** Follow the steps above, and you'll have Mealy live in ~15 minutes!
+
+**Need help?** Check the troubleshooting section or contact Render support.
+
+**Last Updated**: 2025-10-11
