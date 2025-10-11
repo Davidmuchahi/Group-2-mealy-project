@@ -1,0 +1,53 @@
+databases:
+  - name: mealy-postgres
+    databaseName: mealy
+    user: mealy
+    plan: free
+
+services:
+  # Backend API Service
+  - type: web
+    name: mealy-backend
+    runtime: python
+    plan: free
+    buildCommand: |
+      cd server
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      flask db upgrade
+    startCommand: |
+      cd server
+      gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 app:app
+    envVars:
+      - key: FLASK_APP
+        value: app.py
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mealy-postgres
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 5000
+
+  # Frontend Static Site
+  - type: web
+    name: mealy-frontend
+    runtime: static
+    plan: free
+    buildCommand: |
+      cd client
+      npm install
+      npm run build
+    staticPublishPath: ./client/build
+    envVars:
+      - key: NODE_VERSION
+        value: 18.x
+      - key: REACT_APP_API_URL
+        value: https://mealy-backend.onrender.com
